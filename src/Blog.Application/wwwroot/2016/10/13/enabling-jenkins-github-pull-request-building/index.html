@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Enabling Jenkins to build GitHub Enterprise Pull Requests</title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="description" content="">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    
+
+    <meta name="twitter:card" content="summary" />
+<meta name="twitter:site" content="@codemunkies" />
+
+
+<meta name="twitter:title" content="Enabling Jenkins to build GitHub Enterprise Pull Requests" />
+
+
+
+<meta name="twitter:description" content="Taking some of the load out of code reviews" />
+
+
+
+<meta name="twitter:image" content="http://localhost:4000/cm.png" />
+
+
+    
+<meta property="og:url" content="http://localhost:4000/2016/10/13/enabling-jenkins-github-pull-request-building/" />
+
+<meta property="og:site_name" content="codemunkies by Steve Hocking" />
+
+
+<meta property="og:type" content="article" />
+
+
+
+<meta property="og:title" content="Enabling Jenkins to build GitHub Enterprise Pull Requests" />
+
+
+
+<meta property="og:description" content="Taking some of the load out of code reviews" />
+
+
+
+<meta property="og:image" content="http://localhost:4000/cm.png" />
+
+
+
+</head>
+
+
+<body>
+
+  <header class="site-header">
+
+  <div class="wrap">
+
+    <a class="site-title" href="/">codemunkies</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+           viewBox="0 0 18 15" enable-background="new 0 0 18 15" xml:space="preserve">
+          <path fill="#505050" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0
+            h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#505050" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484
+            h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#505050" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0
+            c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+      <div class="trigger">
+        
+          <a class="page-link" href="/about/">About codemunkies</a>
+        
+          <a class="page-link" href="/feed.xml"></a>
+        
+          <a class="page-link" href="/"></a>
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+  <div class="page-content">
+    <!-- <div class="wrap">
+      <img src="/cm.png" alt="codemunkies" /> -->
+
+      
+<header class="post-header" style="background-image: url('/assets/blog-banner.jpg');">
+
+  <div class="wrap">
+    <img src="/cm.png" alt="codemunkies" />
+    <h1>Enabling Jenkins to build GitHub Enterprise Pull Requests</h1>
+    <h2>Taking some of the load out of code reviews</h2>
+    <p class="meta">Oct 13, 2016</p>
+  </div>
+</header>
+
+<div class="wrap post">
+
+  <article class="post-content">
+    <p>The first step in getting Jenkins to build Pull Requests is to get the <a href="https://wiki.jenkins-ci.org/display/JENKINS/GitHub+pull+request+builder+plugin">GitHub pull request builder plugin</a> installed and setup. Installing is easy, simply go into Jenkins &gt; Plugin Manager, go to the Available tab, check the box next to <em>GitHub pull request builder plugin</em> and press the buttons to do the install. More information is available on the plugins <a href="https://github.com/jenkinsci/ghprb-plugin/blob/master/README.md">readme</a>. Some basic configuration is required on Jenkins <em>configuration page</em> (Manage Jenkins &gt; Configure System) look for the <em>GitHub Pull Request Builder</em> section. You’ll need to provide an address for your GitHub api and a user for the plugin to log in to GitHub with.</p>
+
+<p>To really get the benefit of building pull requests we need to install a webhook on the repository that we are interested in. Except that we don’t do it, we have to let Jenkins (or more specifically GitHub user that Jenkins is using) do it. The easiest way to do this is to do this is to put the Jenkins user into a team within your (GitHub) organisation.</p>
+
+<p>Go to GitHub, go into the organisation the repository belongs to, and click the <em>Team</em> tab (circled red).</p>
+
+<p><img src="/assets/2016-10-13-org-teams.PNG" alt="" /></p>
+
+<p>Locate the <em>+ New Team</em> button (circled red).</p>
+
+<p><img src="/assets/2016-10-13-org-add-new-team.PNG" alt="" /></p>
+
+<p>Add your Jenkins user to the group, at this point you can remove yourself from the group, assuming that the Jenkins users is a seperate user.</p>
+
+<p>The next step is to go to the repository that you want Jenkins to build Pull Requests on, and go to the settings tab (circled red).</p>
+
+<p><img src="/assets/2016-10-13-repository-settings.PNG" alt="" /></p>
+
+<p>And click on <em>Collaborators &amp; teams</em> (circled red).</p>
+
+<p><img src="/assets/2016-10-13-repository-settings-two.PNG" alt="" /></p>
+
+<p>Add the group containing your Jenkins user, and then grant them <em>Admin</em> access to the repository (circled red).</p>
+
+<p><img src="/assets/2016-10-13-repository-jenkins-admin.PNG" alt="" /></p>
+
+<p>This completes the configuration on the GitHub side. Back in Jenkins go to the configure your build. In the <em>Build Triggers</em> section locate the <em>GitHub Pull Request Builder</em> checkbox and check it (circled red).</p>
+
+<p><img src="/assets/2016-10-13-enable-pull-request-build.PNG" alt="" /></p>
+
+<p>The one setting we have changed from default is the <em>Build every pull request automatically without asking (Dangerous!).</em> setting, turning it on. We additionally had to add a <em>Update commit status during build</em> <em>Trigger</em> setting the <em>Commit Status Context</em>. You may or may not need to do this depending on your setup.</p>
+
+<p>The final step is to add the <em>Set build status on GitHub commit</em> <em>Post-build Action</em>, if the build is completed successfully then the last commit is flagged.</p>
+
+  </article>
+
+  
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+  /* * * CONFIGURATION VARIABLES * * */
+  var disqus_shortname = 'codemunkies';
+
+  /* * * DON'T EDIT BELOW THIS LINE * * */
+  (function() {
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+  
+
+</div>
+
+    <!-- </div> -->
+  </div>
+
+  <footer class="site-footer">
+
+  <div class="wrap">
+
+    <h2 class="footer-heading">codemunkies</h2>
+
+    <div class="footer-col-1 column">
+      <ul>
+        <li>codemunkies</li>
+        <li><a href="mailto:steve@codemunki.es">steve@codemunki.es</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col-2 column">
+      <ul>
+        <li>
+          <a href="https://github.com/steve-codemunkies">
+            <span class="icon github">
+              <i class="fa fa-github"></i>
+            </span>
+            <span class="username">/steve-codemunkies</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://twitter.com/codemunkies">
+            <span class="icon twitter">
+              <i class="fa fa-twitter"></i>
+            </span>
+            <span class="username">/codemunkies</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://twitter.com/SteveHocking">
+            <span class="icon twitter">
+              <i class="fa fa-twitter"></i>
+            </span>
+            <span class="username">/SteveHocking</span>
+          </a>
+        </li>
+        <li>
+          <a href="http://stackoverflow.com/users/747649/steve">
+            <span class="icon stackoverflow">
+              <i class="fa fa-stack-overflow"></i>
+            </span>
+            <span class="username">/steve</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="footer-col-3 column">
+      <p class="text"></p>
+    </div>
+
+  </div>
+
+</footer>
+
+
+</body>
+
+</html>

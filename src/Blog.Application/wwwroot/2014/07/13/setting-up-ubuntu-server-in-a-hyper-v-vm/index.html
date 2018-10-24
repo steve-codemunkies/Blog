@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Setting up an Ubuntu Server VM in Windows 8 Hyper-V</title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="description" content="">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    
+
+    <meta name="twitter:card" content="summary" />
+<meta name="twitter:site" content="@codemunkies" />
+
+
+<meta name="twitter:title" content="Setting up an Ubuntu Server VM in Windows 8 Hyper-V" />
+
+
+
+<meta name="twitter:description" content="Configuring Hyper-V, setting up the vm, installing Ubuntu Server, and finally configuring the server." />
+
+
+
+<meta name="twitter:image" content="http://localhost:4000/cm.png" />
+
+
+    
+<meta property="og:url" content="http://localhost:4000/2014/07/13/setting-up-ubuntu-server-in-a-hyper-v-vm/" />
+
+<meta property="og:site_name" content="codemunkies by Steve Hocking" />
+
+
+<meta property="og:type" content="article" />
+
+
+
+<meta property="og:title" content="Setting up an Ubuntu Server VM in Windows 8 Hyper-V" />
+
+
+
+<meta property="og:description" content="Configuring Hyper-V, setting up the vm, installing Ubuntu Server, and finally configuring the server." />
+
+
+
+<meta property="og:image" content="http://localhost:4000/cm.png" />
+
+
+
+</head>
+
+
+<body>
+
+  <header class="site-header">
+
+  <div class="wrap">
+
+    <a class="site-title" href="/">codemunkies</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+           viewBox="0 0 18 15" enable-background="new 0 0 18 15" xml:space="preserve">
+          <path fill="#505050" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0
+            h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#505050" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484
+            h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#505050" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0
+            c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+      <div class="trigger">
+        
+          <a class="page-link" href="/about/">About codemunkies</a>
+        
+          <a class="page-link" href="/feed.xml"></a>
+        
+          <a class="page-link" href="/"></a>
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+  <div class="page-content">
+    <!-- <div class="wrap">
+      <img src="/cm.png" alt="codemunkies" /> -->
+
+      
+<header class="post-header" style="background-image: url('/assets/blog-banner.jpg');">
+
+  <div class="wrap">
+    <img src="/cm.png" alt="codemunkies" />
+    <h1>Setting up an Ubuntu Server VM in Windows 8 Hyper-V</h1>
+    <h2>Configuring Hyper-V, setting up the vm, installing Ubuntu Server, and finally configuring the server.</h2>
+    <p class="meta">Jul 13, 2014</p>
+  </div>
+</header>
+
+<div class="wrap post">
+
+  <article class="post-content">
+    <p>This is a brief tutorial on how to setup a virtual machine on Hyper-V in Windows 8 running Ubuntu Server; and then more importantly be able to communicate with it from within the host operating system.</p>
+
+<p>The first step is to enable Hyper-V, instructions for <a href="http://windows.microsoft.com/en-gb/windows-8/hyper-v-run-virtual-machines">Windows 8/8.1</a> are linked. The system requirements and actually installing/setting up Hyper-V are beyond the scope of this article. Once Hyper-V is working then follow these steps:</p>
+
+<h2 id="windows-host-setup">Windows (host) setup</h2>
+
+<ol>
+  <li>Open Hyper-V Manager ( you’ll be able to fins it easily enough using the search charm).</li>
+  <li>In the right hand panel select Virtual Switch Manager…
+<img src="/assets/2014-07-13-hyperv-mgr-vsm.png" alt="Virtual Switch Manager in Hyper-V Manager" /></li>
+  <li>In the Virtual Switch Manager select New virtual network switch (1); then click on Internal (2); finally click on Create Virtual Switch (3)
+<img src="/assets/2014-07-13-vsm-new-internal.png" alt="Virtual Switch Manager, creating new switch" /></li>
+  <li>Set the name of the switch (this will be important later on) (1); make sure that it’s an Internal network (2); Check the Enable virtual LAN identification for management operating system checkbox (3) and then assign an id (4) (this, along with the static ip addresses that will be set allow the guest and host Os’s to communicate); finally click OK (5).
+<img src="/assets/2014-07-13-internal-switch-settings.png" alt="Internal switch settings" /></li>
+  <li>Go to the Control Panel, then Network and Sharing Center and then click on Change adapter settings. Right click on the vEthernet (Internal Virtual Switch) and select Properties.
+<img src="/assets/2014-07-13-net-conn-veth.png" alt="Network Connections - vEthernet (Internal Virtual Switch)" /></li>
+  <li>In the list of items locate and click on the Internet Protocol Version 4 (TCP/IPv4) (1), and then click on the Properties (2) button.
+<img src="/assets/2014-07-13-veth-properties.png" alt="vEthernet (Internal Virtual Switch) Properties" /></li>
+  <li>On the Internet Protocol Version 4 (TCP/IPv4) Properties change to the Use the following IP addess: radio button (1). In the IP address put in an address that won’t conflict with any of the networks you regularly use (2). In the Subnet mask put in 255.255.255.0 (3) (you can <a href="http://support.microsoft.com/kb/164015">find out more about subnet masks here</a>). Click on OK (4). Also OK the previous dialog.
+<img src="/assets/2014-07-13-ipv4-properties.png" alt="Internet Protocol Version 4 (TCP/IPv4) Properties" /></li>
+  <li>The final step before installing your OS, but after creating your virtual machine is to ensure that there is one network adapter connected to the Internal Virtual Switch (1). Also the Enable virtual LAN identification (2) checkbox should be checked, and the identifier (3) set to the same one used in step 4. After changing any other settings click OK (4).
+<img src="/assets/2014-07-13-vm-network-adapter.png" alt="VM Network Adapter settings" /></li>
+</ol>
+
+<p>Installing a guest OS in your shiny new virtual machine is another thing beyond the scope of this article, but there is plenty of information out there. I chose to install Ubuntu Server LTS 14.04, other options are available.</p>
+
+<h2 id="ubuntu-server-guest-setup">Ubuntu Server (guest) setup</h2>
+
+<p>These instructions are based on the Internal Virtual Switch being connected to the first network adapter. If this is the case then this network adapter will be known in your (*nix based) guest as <em>eth0</em>.</p>
+
+<ol>
+  <li>Log in to the guest operating system</li>
+  <li>
+    <p>Edit /etc/network/interfaces file. You will probably need to raise your privileges to edit the file using <em>sudo</em>:</p>
+
+    <div class="highlight"><pre><code class="bash">sudo vim /etc/network/interfaces</code></pre></div>
+
+    <p>By default when you start vim it puts you into command mode, you need to go into INSERT mode by pressing I.</p>
+  </li>
+  <li>
+    <p>Locate any existing section for the interface that connects to Internal Virtual Switch, and remove it. It will probably start with something similar to:</p>
+
+    <pre>auto eth0</pre>
+  </li>
+  <li>
+    <p>Insert the following entries into the file:</p>
+
+    <pre>auto eth0
+iface eth0 inet static
+     address 192.168.2.2
+     netmask 255.255.255.0</pre>
+
+    <p>Of course this assumes that the interface is eth0 and the static address you have given the Internal Virtual Switch is 192.168.2.1.</p>
+  </li>
+  <li>
+    <p>Finally either reboot the vm, or reset the network interface that is connected to Internal Virtual Switch.</p>
+
+    <p>The internal switch can be reset using the <em>ifdown/ifup</em> commands, the vm can be rebooted using the <em>reboot</em> command.</p>
+  </li>
+</ol>
+
+<p>Assuming that you installed SSH as part of the guest OS setup you should now be able to ssh into the server using the IP address set in step four.</p>
+
+
+  </article>
+
+  
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+  /* * * CONFIGURATION VARIABLES * * */
+  var disqus_shortname = 'codemunkies';
+
+  /* * * DON'T EDIT BELOW THIS LINE * * */
+  (function() {
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+  
+
+</div>
+
+    <!-- </div> -->
+  </div>
+
+  <footer class="site-footer">
+
+  <div class="wrap">
+
+    <h2 class="footer-heading">codemunkies</h2>
+
+    <div class="footer-col-1 column">
+      <ul>
+        <li>codemunkies</li>
+        <li><a href="mailto:steve@codemunki.es">steve@codemunki.es</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col-2 column">
+      <ul>
+        <li>
+          <a href="https://github.com/steve-codemunkies">
+            <span class="icon github">
+              <i class="fa fa-github"></i>
+            </span>
+            <span class="username">/steve-codemunkies</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://twitter.com/codemunkies">
+            <span class="icon twitter">
+              <i class="fa fa-twitter"></i>
+            </span>
+            <span class="username">/codemunkies</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://twitter.com/SteveHocking">
+            <span class="icon twitter">
+              <i class="fa fa-twitter"></i>
+            </span>
+            <span class="username">/SteveHocking</span>
+          </a>
+        </li>
+        <li>
+          <a href="http://stackoverflow.com/users/747649/steve">
+            <span class="icon stackoverflow">
+              <i class="fa fa-stack-overflow"></i>
+            </span>
+            <span class="username">/steve</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="footer-col-3 column">
+      <p class="text"></p>
+    </div>
+
+  </div>
+
+</footer>
+
+
+</body>
+
+</html>

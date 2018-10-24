@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>The Pit of Success</title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="description" content="">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    
+
+    <meta name="twitter:card" content="summary" />
+<meta name="twitter:site" content="@codemunkies" />
+
+
+<meta name="twitter:title" content="The Pit of Success" />
+
+
+
+<meta name="twitter:description" content="Because the Guided Busway to Success isn't as emotive or intriguing, also it's not just for developers!" />
+
+
+
+<meta name="twitter:image" content="http://localhost:4000/assets/2018-06-01-indy-snake-pit.jpg" />
+
+
+    
+<meta property="og:url" content="http://localhost:4000/2018/06/01/pit-of-success/" />
+
+<meta property="og:site_name" content="codemunkies by Steve Hocking" />
+
+
+<meta property="og:type" content="article" />
+
+
+
+<meta property="og:title" content="The Pit of Success" />
+
+
+
+<meta property="og:description" content="Because the Guided Busway to Success isn't as emotive or intriguing, also it's not just for developers!" />
+
+
+
+<meta property="og:image" content="http://localhost:4000/assets/2018-06-01-indy-snake-pit.jpg" />
+
+
+
+</head>
+
+
+<body>
+
+  <header class="site-header">
+
+  <div class="wrap">
+
+    <a class="site-title" href="/">codemunkies</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+           viewBox="0 0 18 15" enable-background="new 0 0 18 15" xml:space="preserve">
+          <path fill="#505050" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0
+            h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#505050" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484
+            h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#505050" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0
+            c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+      <div class="trigger">
+        
+          <a class="page-link" href="/about/">About codemunkies</a>
+        
+          <a class="page-link" href="/feed.xml"></a>
+        
+          <a class="page-link" href="/"></a>
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+  <div class="page-content">
+    <!-- <div class="wrap">
+      <img src="/cm.png" alt="codemunkies" /> -->
+
+      
+<header class="post-header" style="background-image: url('/assets/2018-06-01-indy-snake-pit.jpg'); background-size: cover;">
+
+  <div class="wrap">
+    <img src="/cm.png" alt="codemunkies" />
+    <h1>The Pit of Success</h1>
+    <h2>Because the Guided Busway to Success isn't as emotive or intriguing, also it's not just for developers!</h2>
+    <p class="meta">Jun 1, 2018</p>
+  </div>
+</header>
+
+<div class="wrap post">
+
+  <article class="post-content">
+    <p>A long time ago, on something less powerful than my current wristwatch, I read an article by <a href="https://en.wikipedia.org/wiki/Jeff_Atwood">Jeff Atwood</a> titled <a href="https://blog.codinghorror.com/falling-into-the-pit-of-success/">
+Falling Into The Pit of Success</a>. And because of the type of person that Jeff seems to be (I only know him from the internet…) two things are true:</p>
+
+<ul>
+  <li>The article is <em>still</em> available on his web-site, in it’s original form</li>
+  <li>The article is still as true and relevant today as it was all those years ago</li>
+</ul>
+
+<p><img src="/assets/2018-06-01-grail-knight.jpg" style="float: left; margin-right: 15px;" alt="Grail Knight - Copyright Lucasfilm" /></p>
+
+<p>And yet the number of people who are aware of the pit of success is tiny!</p>
+
+<p>In my instance I was talking with one of my colleagues, we were looking at the performance of a service, and worked out that some caching would help enormously. This time the monitoring guided us down the path of <a href="http://www.gitshah.com/2012/03/nhibernate-and-caching-part-2.html">nHibernate Level 2 Caching</a>.</p>
+
+<h2 id="context-switch">Context switch</h2>
+
+<p>But before we carry on a bit of context: It happens that we work with nHibernate a lot, and have dug our own <em>pit of success</em> for nHibernate. We have an in-house package that the developer installs, they add a small amount of (reasonably well documented) code and configuration to the project and get nHibernate talking to their database. Magic!</p>
+
+<p>Well actually it isn’t. It’s <a href="https://en.wikipedia.org/wiki/Convention_over_configuration">convention over configuration</a>. By spending a bit of time to work out what we did <em>most of the time</em> and codifying this as a set of conventions (which are very close to the <a href="https://github.com/FluentNHibernate/fluent-nhibernate/wiki/Conventions">Fluent nHibernate conventions</a>), I have been able to tell my team “Do databasing in this way, put in this config and this bit of code and it will all work!”. And it does. Which is nice.</p>
+
+<h2 id="story-time">Story time</h2>
+
+<p>But going back to my story, we had never dealt with L2 cache before. I know! Weird right? My colleague did some hacking around in code, and worked out how to make the whole thing a convention, and she took me through it. When we finished I noticed that one of the table in the database was, for obscure but good reasons, not following the conventions and asked about.</p>
+
+<p><strong>Colleague</strong>: [<em>Reasons why the id needed to be generated by SQL Server, not nhilo</em>]</p>
+
+<p><strong>Me</strong>: Ok, cool, and I see you found the way to do it easily enough?</p>
+
+<p><strong>Colleague</strong>: <em>Yeah, and I was wondering about making it a convention, like the Level 2 stuff</em></p>
+
+<p><strong>Me</strong>: Ok, why’s that?</p>
+
+<p><strong>Colleague</strong>: <em>It would be really easy, and then next time someone needs to do it they don’t need to go through this palaver</em></p>
+
+<p><strong>Me</strong>: It was that hard?</p>
+
+<p><strong>Colleague</strong>: <em>Not really, but it needed more code than I liked</em></p>
+
+<p><strong>Me</strong>: Ok</p>
+
+<p><strong>Colleague</strong>: <em>And as I said, making it a convention isn’t that hard</em></p>
+
+<p><strong>Me</strong>: I’m pretty sure that you’re right that making it a convention would be easy, but I don’t think we should do it</p>
+
+<p><strong>Colleague</strong>: <em>Why?</em></p>
+
+<p><img src="/assets/2018-06-01-escape-ladder.jpg" style="float: right; margin-left: 15px;" alt="© Can Stock Photo / corachaos" /></p>
+
+<h2 id="thought-experiment">Thought experiment(!)</h2>
+
+<p>And this is an interesting question. So let’s do a thought experiment. We add the ability to use generated id’s to the set of nHibernate conventions, and it quickly becomes known that now there are two Id stategies:</p>
+
+<ul>
+  <li>Generated Id’s (assigned by SQL Server, usually through an <code class="highlighter-rouge">IDENTITY()</code> field)</li>
+  <li><a href="https://stackoverflow.com/questions/2738671/explanation-of-nhibernate-hilo">HiLo</a> where nHibernate manages the Id’s of records, but needs a populated <em>nhilo</em> table</li>
+</ul>
+
+<p>You are the developer on the next project and need a new table with a new identity column. Which strategy are you going to choose? Yup, I’m choosing <code class="highlighter-rouge">IDENTITY()</code> as well, because it’s easier.</p>
+
+<p>Your application/service goes into production and has performance issues, and we find out that these are because of the inserts, which nHibernate is having to do sequentially (whilst getting the record id’s from SQL Server), because it doesn’t control the id column anymore. And the pit of success is now the pit of despair.</p>
+
+<h2 id="escape-ladders-ponds-and-guided-busways">Escape ladders, ponds and guided busways</h2>
+
+<p>So what to do about this? Well actually I already did, when the configuration library and conventions were built I put in some very specific escape ladders precisely for these kind of scenarios. The escape ladders are not widely publicised, or used, but they aren’t hidden away either. And as my colleague demonstrated they work.</p>
+
+<p>And we have successfully taken this strategy and applied it to several other areas. For our Dependency Injection needs we use <a href="https://autofac.org/">Autofac</a>, and we have a bunch of conventions built up around this, including around slightly more complicated things like <a href="http://autofaccn.readthedocs.io/en/latest/advanced/adapters-decorators.html">decorator registration</a>, that mean for my team these are no longer advanced topics, and we can harness their power easily and repeatedly.</p>
+
+<p>And finally how is the <em>pit of success</em> not just for developers? The point is there in Jeff’s orignal post. You can take the principal and apply it to pretty much anything. And any product or process that has had some time and thought lavished upon it probably also lives in (or very near) the pit of success.</p>
+
+<p>So in truth the <em>pit of success</em> should be less a pit, and more a shallow pond, or perhaps a <a href="https://youtu.be/10UY3WC4nDY">guided busway</a>. But then I wouldn’t be using pictures of Indiana Jones…</p>
+
+  </article>
+
+  
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+  /* * * CONFIGURATION VARIABLES * * */
+  var disqus_shortname = 'codemunkies';
+
+  /* * * DON'T EDIT BELOW THIS LINE * * */
+  (function() {
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+  
+
+</div>
+
+    <!-- </div> -->
+  </div>
+
+  <footer class="site-footer">
+
+  <div class="wrap">
+
+    <h2 class="footer-heading">codemunkies</h2>
+
+    <div class="footer-col-1 column">
+      <ul>
+        <li>codemunkies</li>
+        <li><a href="mailto:steve@codemunki.es">steve@codemunki.es</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col-2 column">
+      <ul>
+        <li>
+          <a href="https://github.com/steve-codemunkies">
+            <span class="icon github">
+              <i class="fa fa-github"></i>
+            </span>
+            <span class="username">/steve-codemunkies</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://twitter.com/codemunkies">
+            <span class="icon twitter">
+              <i class="fa fa-twitter"></i>
+            </span>
+            <span class="username">/codemunkies</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://twitter.com/SteveHocking">
+            <span class="icon twitter">
+              <i class="fa fa-twitter"></i>
+            </span>
+            <span class="username">/SteveHocking</span>
+          </a>
+        </li>
+        <li>
+          <a href="http://stackoverflow.com/users/747649/steve">
+            <span class="icon stackoverflow">
+              <i class="fa fa-stack-overflow"></i>
+            </span>
+            <span class="username">/steve</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="footer-col-3 column">
+      <p class="text"></p>
+    </div>
+
+  </div>
+
+</footer>
+
+
+</body>
+
+</html>

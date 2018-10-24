@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Mocking a fluent interface 'automatically' in Moq</title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="description" content="">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    
+
+    <meta name="twitter:card" content="summary" />
+<meta name="twitter:site" content="@codemunkies" />
+
+
+<meta name="twitter:title" content="Mocking a fluent interface 'automatically' in Moq" />
+
+
+
+<meta name="twitter:description" content="Fluent interfaces and objects can be useful and self documenting in certain situations, e.g. builders. However setting up a mock in a unit test can be very painful." />
+
+
+
+<meta name="twitter:image" content="http://localhost:4000/cm.png" />
+
+
+    
+<meta property="og:url" content="http://localhost:4000/2014/11/20/mocking-a-fluent-interface-automatically-in-moq/" />
+
+<meta property="og:site_name" content="codemunkies by Steve Hocking" />
+
+
+<meta property="og:type" content="article" />
+
+
+
+<meta property="og:title" content="Mocking a fluent interface 'automatically' in Moq" />
+
+
+
+<meta property="og:description" content="Fluent interfaces and objects can be useful and self documenting in certain situations, e.g. builders. However setting up a mock in a unit test can be very painful." />
+
+
+
+<meta property="og:image" content="http://localhost:4000/cm.png" />
+
+
+
+</head>
+
+
+<body>
+
+  <header class="site-header">
+
+  <div class="wrap">
+
+    <a class="site-title" href="/">codemunkies</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+           viewBox="0 0 18 15" enable-background="new 0 0 18 15" xml:space="preserve">
+          <path fill="#505050" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0
+            h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#505050" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484
+            h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#505050" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0
+            c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+      <div class="trigger">
+        
+          <a class="page-link" href="/about/">About codemunkies</a>
+        
+          <a class="page-link" href="/feed.xml"></a>
+        
+          <a class="page-link" href="/"></a>
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+  <div class="page-content">
+    <!-- <div class="wrap">
+      <img src="/cm.png" alt="codemunkies" /> -->
+
+      
+<header class="post-header" style="background-image: url('/assets/blog-banner.jpg');">
+
+  <div class="wrap">
+    <img src="/cm.png" alt="codemunkies" />
+    <h1>Mocking a fluent interface 'automatically' in Moq</h1>
+    <h2>Fluent interfaces and objects can be useful and self documenting in certain situations, e.g. builders. However setting up a mock in a unit test can be very painful.</h2>
+    <p class="meta">Nov 20, 2014</p>
+  </div>
+</header>
+
+<div class="wrap post">
+
+  <article class="post-content">
+    <p>A brief post to show how to create an <a href="http://msdn.microsoft.com/en-GB/library/bb383977.aspx">extension method</a> that quickly and simply mocks out the fluent methods of an interface.</p>
+
+<p>First though we need to define <em>what</em> a fluent interface is: Put simply a fluent interface (or api) is one that allows you to chain method calls. <a href="http://visualstudiomagazine.com/articles/2012/05/10/fluent-interface-design-in-net.aspx">This 2012 article by Eric Vogel</a> has a nice simple demonstration.</p>
+
+<p>So let’s imagine that we are going to use the two interfaces defined in that article in our code. The interfaces look like this:</p>
+
+<pre>public interface IFluentEmailSender
+{
+    IFluentEmailSender FromServer(string host);
+    IFluentEmailSender WithCredentials(string username, string password);
+    IFluentEmailMessage CreateEmail();
+    void Send();
+}</pre>
+
+<pre>public interface IFluentEmailMessage
+{
+    IFluentEmailMessage From(string fromAddress);
+    IFluentEmailMessage To(string toAddress);
+    IFluentEmailMessage Saying(string message);
+    IFluentEmailMessage WithSubject(string subject);
+    IFluentEmailSender Done();
+}</pre>
+
+<p>We need to write some code to consume these interfaces, and because we’re good developers, we’re going to do this with TDD and write some tests. What you’ll quickly find is that somewhere in your code you have code that looks similar to the following…</p>
+
+<pre>[SetUp]
+public void SetUp()
+{
+    var messageMock = new Mock&lt;IFluentEmailMessage&gt;();
+    var senderMock = new Mock&lt;IFluentEmailSender&gt;();
+
+    messageMock.Setup(m =&gt; m.From(It.IsAny&lt;string&gt;())).Returns(messageMock.Object);
+    messageMock.Setup(m =&gt; m.To(It.IsAny&lt;string&gt;())).Returns(messageMock.Object);
+    messageMock.Setup(m =&gt; m.Saying(It.IsAny&lt;string&gt;())).Returns(messageMock.Object);
+    messageMock.Setup(m =&gt; m.WithSubject(It.IsAny&lt;string&gt;())).Returns(messageMock.Object);
+    messageMock.Setup(m =&gt; m.Done()).Returns(senderMock.Object);
+
+    senderMock.Setup(s =&gt; s.FromServer(It.IsAny&lt;string&gt;())).Returns(senderMock.Object);
+    senderMock.Setup(s =&gt; s.WithCredentials(It.IsAny&lt;string&gt;(), It.IsAny&lt;string&gt;())).Returns(senderMock.Object);
+    senderMock.Setup(s =&gt; s.CreateEmail()).Returns(messageMock.Object);
+}</pre>
+
+<p>And this really isn’t very nice, right? Well, it doesn’t have to be like that!</p>
+
+<noscript>
+    <link rel="stylesheet" href="https://gist-assets.github.com/assets/embed-81292f31902b1c0ba82591f0046fa60c.css" />
+    <div id="gist16426875" class="gist">
+        <div class="gist-file">
+          <div class="gist-data gist-syntax">
+
+
+
+
+    <div class="file-data">
+      <table cellpadding="0" cellspacing="0" class="lines highlight">
+        <tbody><tr>
+          <td class="line-numbers">
+            <span class="line-number" id="file-mockingutils-cs-L1" rel="file-mockingutils-cs-L1">1</span>
+            <span class="line-number" id="file-mockingutils-cs-L2" rel="file-mockingutils-cs-L2">2</span>
+            <span class="line-number" id="file-mockingutils-cs-L3" rel="file-mockingutils-cs-L3">3</span>
+            <span class="line-number" id="file-mockingutils-cs-L4" rel="file-mockingutils-cs-L4">4</span>
+            <span class="line-number" id="file-mockingutils-cs-L5" rel="file-mockingutils-cs-L5">5</span>
+            <span class="line-number" id="file-mockingutils-cs-L6" rel="file-mockingutils-cs-L6">6</span>
+            <span class="line-number" id="file-mockingutils-cs-L7" rel="file-mockingutils-cs-L7">7</span>
+            <span class="line-number" id="file-mockingutils-cs-L8" rel="file-mockingutils-cs-L8">8</span>
+            <span class="line-number" id="file-mockingutils-cs-L9" rel="file-mockingutils-cs-L9">9</span>
+            <span class="line-number" id="file-mockingutils-cs-L10" rel="file-mockingutils-cs-L10">10</span>
+            <span class="line-number" id="file-mockingutils-cs-L11" rel="file-mockingutils-cs-L11">11</span>
+            <span class="line-number" id="file-mockingutils-cs-L12" rel="file-mockingutils-cs-L12">12</span>
+            <span class="line-number" id="file-mockingutils-cs-L13" rel="file-mockingutils-cs-L13">13</span>
+            <span class="line-number" id="file-mockingutils-cs-L14" rel="file-mockingutils-cs-L14">14</span>
+            <span class="line-number" id="file-mockingutils-cs-L15" rel="file-mockingutils-cs-L15">15</span>
+            <span class="line-number" id="file-mockingutils-cs-L16" rel="file-mockingutils-cs-L16">16</span>
+            <span class="line-number" id="file-mockingutils-cs-L17" rel="file-mockingutils-cs-L17">17</span>
+            <span class="line-number" id="file-mockingutils-cs-L18" rel="file-mockingutils-cs-L18">18</span>
+            <span class="line-number" id="file-mockingutils-cs-L19" rel="file-mockingutils-cs-L19">19</span>
+            <span class="line-number" id="file-mockingutils-cs-L20" rel="file-mockingutils-cs-L20">20</span>
+            <span class="line-number" id="file-mockingutils-cs-L21" rel="file-mockingutils-cs-L21">21</span>
+            <span class="line-number" id="file-mockingutils-cs-L22" rel="file-mockingutils-cs-L22">22</span>
+            <span class="line-number" id="file-mockingutils-cs-L23" rel="file-mockingutils-cs-L23">23</span>
+            <span class="line-number" id="file-mockingutils-cs-L24" rel="file-mockingutils-cs-L24">24</span>
+            <span class="line-number" id="file-mockingutils-cs-L25" rel="file-mockingutils-cs-L25">25</span>
+            <span class="line-number" id="file-mockingutils-cs-L26" rel="file-mockingutils-cs-L26">26</span>
+            <span class="line-number" id="file-mockingutils-cs-L27" rel="file-mockingutils-cs-L27">27</span>
+            <span class="line-number" id="file-mockingutils-cs-L28" rel="file-mockingutils-cs-L28">28</span>
+            <span class="line-number" id="file-mockingutils-cs-L29" rel="file-mockingutils-cs-L29">29</span>
+            <span class="line-number" id="file-mockingutils-cs-L30" rel="file-mockingutils-cs-L30">30</span>
+            <span class="line-number" id="file-mockingutils-cs-L31" rel="file-mockingutils-cs-L31">31</span>
+            <span class="line-number" id="file-mockingutils-cs-L32" rel="file-mockingutils-cs-L32">32</span>
+            <span class="line-number" id="file-mockingutils-cs-L33" rel="file-mockingutils-cs-L33">33</span>
+            <span class="line-number" id="file-mockingutils-cs-L34" rel="file-mockingutils-cs-L34">34</span>
+            <span class="line-number" id="file-mockingutils-cs-L35" rel="file-mockingutils-cs-L35">35</span>
+            <span class="line-number" id="file-mockingutils-cs-L36" rel="file-mockingutils-cs-L36">36</span>
+          </td>
+          <td class="line-data">
+            <pre class="line-pre"><div class="line" id="file-mockingutils-cs-LC1"><span class="pl-k">using</span> System;
+</div><div class="line" id="file-mockingutils-cs-LC2"><span class="pl-k">using</span> System.Linq;
+</div><div class="line" id="file-mockingutils-cs-LC3"><span class="pl-k">using</span> System.Linq.Expressions;
+</div><div class="line" id="file-mockingutils-cs-LC4">&nbsp;
+</div><div class="line" id="file-mockingutils-cs-LC5"><span class="pl-k">namespace</span> <span class="pl-en">Moq</span>
+</div><div class="line" id="file-mockingutils-cs-LC6">{
+</div><div class="line" id="file-mockingutils-cs-LC7">    <span class="pl-s">public</span> <span class="pl-s">static</span> <span class="pl-s">class</span> <span class="pl-en">MockingUtilities</span>
+</div><div class="line" id="file-mockingutils-cs-LC8">    {
+</div><div class="line" id="file-mockingutils-cs-LC9">        <span class="pl-s">public</span> <span class="pl-s">static</span> Mock&lt;T&gt; AutoMockFluentInterface&lt;T&gt;(this Mock&lt;T&gt; interfaceMock) where T:class
+</div><div class="line" id="file-mockingutils-cs-LC10">        {
+</div><div class="line" id="file-mockingutils-cs-LC11">            <span class="pl-c">// Get the methodinfo for isany on it</span>
+</div><div class="line" id="file-mockingutils-cs-LC12">            <span class="pl-k">var</span> isAnyMethodInfo = <span class="pl-k">typeof</span> (It).GetMethod(<span class="pl-s1"><span class="pl-pds">"</span>IsAny<span class="pl-pds">"</span></span>);
+</div><div class="line" id="file-mockingutils-cs-LC13">            <span class="pl-k">var</span> instance = Expression.Parameter(<span class="pl-k">typeof</span> (T), <span class="pl-s1"><span class="pl-pds">"</span>fluentInterface<span class="pl-pds">"</span></span>);
+</div><div class="line" id="file-mockingutils-cs-LC14">&nbsp;
+</div><div class="line" id="file-mockingutils-cs-LC15">            <span class="pl-c">// Get the methods from the interface, and filter to those that return T</span>
+</div><div class="line" id="file-mockingutils-cs-LC16">            <span class="pl-k">var</span> fluentMethods = <span class="pl-k">typeof</span> (T).GetMethods().Where(mi =&gt; mi.ReturnType == <span class="pl-k">typeof</span> (T));
+</div><div class="line" id="file-mockingutils-cs-LC17">&nbsp;
+</div><div class="line" id="file-mockingutils-cs-LC18">            <span class="pl-k">foreach</span> (<span class="pl-k">var</span> fluentMethod <span class="pl-k">in</span> fluentMethods)
+</div><div class="line" id="file-mockingutils-cs-LC19">            {
+</div><div class="line" id="file-mockingutils-cs-LC20">                <span class="pl-k">var</span> parameters = fluentMethod.GetParameters()
+</div><div class="line" id="file-mockingutils-cs-LC21">                                             .Select(parameterInfo =&gt;
+</div><div class="line" id="file-mockingutils-cs-LC22">                                                         Expression.Call(isAnyMethodInfo.MakeGenericMethod(parameterInfo
+</div><div class="line" id="file-mockingutils-cs-LC23">                                                                                                               .ParameterType),
+</div><div class="line" id="file-mockingutils-cs-LC24">                                                                         <span class="pl-s">new</span> Expression[<span class="pl-c1">0</span>]))
+</div><div class="line" id="file-mockingutils-cs-LC25">                                             .Cast&lt;Expression&gt;()
+</div><div class="line" id="file-mockingutils-cs-LC26">                                             .AsEnumerable();
+</div><div class="line" id="file-mockingutils-cs-LC27">                interfaceMock.Setup(Expression.Lambda&lt;Func&lt;T, T&gt;&gt;(Expression.Call(instance,
+</div><div class="line" id="file-mockingutils-cs-LC28">                                                                                  fluentMethod,
+</div><div class="line" id="file-mockingutils-cs-LC29">                                                                                  parameters),
+</div><div class="line" id="file-mockingutils-cs-LC30">                                                                  <span class="pl-s">new</span>[] {instance})).Returns(interfaceMock.Object);
+</div><div class="line" id="file-mockingutils-cs-LC31">            }
+</div><div class="line" id="file-mockingutils-cs-LC32">&nbsp;
+</div><div class="line" id="file-mockingutils-cs-LC33">            <span class="pl-k">return</span> interfaceMock;
+</div><div class="line" id="file-mockingutils-cs-LC34">        }
+</div><div class="line" id="file-mockingutils-cs-LC35">    }
+</div><div class="line" id="file-mockingutils-cs-LC36">}
+</div></pre>
+          </td>
+        </tr>
+      </tbody></table>
+    </div>
+
+          </div>
+          <div class="gist-meta">
+            <a href="https://gist.github.com/steve-codemunkies/38fb24eede7a3d0d52e8/raw/MockingUtils.cs" style="float:right">view raw</a>
+            <a href="https://gist.github.com/steve-codemunkies/38fb24eede7a3d0d52e8#file-mockingutils-cs">MockingUtils.cs</a>
+            hosted with ❤ by <a href="https://github.com">GitHub</a>
+          </div>
+        </div>
+</div>
+</noscript>
+<script src="https://gist.github.com/steve-codemunkies/38fb24eede7a3d0d52e8.js"></script>
+
+<p>First I’ll show you how it is used:</p>
+
+<pre>[SetUp]
+public void SetUp()
+{
+    var messageMock = new Mock&lt;IFluentEmailMessage&gt;().AutoMockFluentInterface();
+    var senderMock = new Mock&lt;IFluentEmailSender&gt;().AutoMockFluentInterface();
+
+    messageMock.Setup(m =&gt; m.Done()).Returns(senderMock.Object);
+
+    senderMock.Setup(s =&gt; s.CreateEmail()).Returns(messageMock.Object);
+}</pre>
+
+<p>Much nicer! So, what’s happening?</p>
+
+<ul>
+  <li>Line 12 - We get a <em>MethodInfo</em> for the <em>IsAny</em> method on <em>It</em>. This will be used later on.</li>
+  <li>Line 13 - Create an expression instance for the generic type <em>T</em>, this seems to be the left half of a lambda (<em>something =&gt; something…</em>).</li>
+  <li>Line 16 - Get all the methods on <em>T</em> that return <em>T</em>.</li>
+  <li>Lines 18-31 - Go through all the methods obtained at line 16.</li>
+  <li>Line 20 - Get the parameters for the method.</li>
+  <li>Line 21-24 - Go through the parameters and make the call to <em>IsAny</em> a closed generic on the type parameter using the <em>MethodInfo</em> from line 12 (e.g. *It.IsAny<string>()*).</string></li>
+  <li>Line 27-30 - Programmatically create a Lambda for the method on the interface.</li>
+</ul>
+
+<p>The biggest trick I found in doing this was using an older version of <a href="http://ilspy.net/">IlSpy</a> to decompile a known set of tests that had lambdas defining expectations.</p>
+
+<p>One thing to note; if you are specifically interested in the values passed to the methods then you will need to do a .Verify() on the mock object.</p>
+
+
+  </article>
+
+  
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+  /* * * CONFIGURATION VARIABLES * * */
+  var disqus_shortname = 'codemunkies';
+
+  /* * * DON'T EDIT BELOW THIS LINE * * */
+  (function() {
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+  
+
+</div>
+
+    <!-- </div> -->
+  </div>
+
+  <footer class="site-footer">
+
+  <div class="wrap">
+
+    <h2 class="footer-heading">codemunkies</h2>
+
+    <div class="footer-col-1 column">
+      <ul>
+        <li>codemunkies</li>
+        <li><a href="mailto:steve@codemunki.es">steve@codemunki.es</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col-2 column">
+      <ul>
+        <li>
+          <a href="https://github.com/steve-codemunkies">
+            <span class="icon github">
+              <i class="fa fa-github"></i>
+            </span>
+            <span class="username">/steve-codemunkies</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://twitter.com/codemunkies">
+            <span class="icon twitter">
+              <i class="fa fa-twitter"></i>
+            </span>
+            <span class="username">/codemunkies</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://twitter.com/SteveHocking">
+            <span class="icon twitter">
+              <i class="fa fa-twitter"></i>
+            </span>
+            <span class="username">/SteveHocking</span>
+          </a>
+        </li>
+        <li>
+          <a href="http://stackoverflow.com/users/747649/steve">
+            <span class="icon stackoverflow">
+              <i class="fa fa-stack-overflow"></i>
+            </span>
+            <span class="username">/steve</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="footer-col-3 column">
+      <p class="text"></p>
+    </div>
+
+  </div>
+
+</footer>
+
+
+</body>
+
+</html>

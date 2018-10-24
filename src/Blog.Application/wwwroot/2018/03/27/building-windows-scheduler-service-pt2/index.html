@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Building a Windows Service to run scheduled tasks the more sensible way - The long awaited Part 2!</title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="description" content="">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    
+    <link rel="stylesheet" href="/css/clocks.css">
+    
+
+    <meta name="twitter:card" content="summary" />
+<meta name="twitter:site" content="@codemunkies" />
+
+
+<meta name="twitter:title" content="Building a Windows Service to run scheduled tasks the more sensible way - The long awaited Part 2!" />
+
+
+
+<meta name="twitter:description" content="Adding in Quartz.Net and doing some actual scheduling! What a time to be alive!" />
+
+
+
+<meta name="twitter:image" content="http://localhost:4000/assets/2016-11-13-clocks.jpg" />
+
+
+    
+<meta property="og:url" content="http://localhost:4000/2018/03/27/building-windows-scheduler-service-pt2/" />
+
+<meta property="og:site_name" content="codemunkies by Steve Hocking" />
+
+
+<meta property="og:type" content="article" />
+
+
+
+<meta property="og:title" content="Building a Windows Service to run scheduled tasks the more sensible way - The long awaited Part 2!" />
+
+
+
+<meta property="og:description" content="Adding in Quartz.Net and doing some actual scheduling! What a time to be alive!" />
+
+
+
+<meta property="og:image" content="http://localhost:4000/assets/2016-11-13-clocks.jpg" />
+
+
+
+</head>
+
+
+<body>
+
+  <header class="site-header">
+
+  <div class="wrap">
+
+    <a class="site-title" href="/">codemunkies</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+           viewBox="0 0 18 15" enable-background="new 0 0 18 15" xml:space="preserve">
+          <path fill="#505050" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0
+            h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#505050" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484
+            h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#505050" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0
+            c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+      <div class="trigger">
+        
+          <a class="page-link" href="/about/">About codemunkies</a>
+        
+          <a class="page-link" href="/feed.xml"></a>
+        
+          <a class="page-link" href="/"></a>
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+  <div class="page-content">
+    <!-- <div class="wrap">
+      <img src="/cm.png" alt="codemunkies" /> -->
+
+      
+<header class="post-header" style="background-image: url('/assets/2016-11-13-clocks.jpg'); background-size: cover;">
+
+  <div class="wrap">
+    <img src="/cm.png" alt="codemunkies" />
+    <h1>Building a Windows Service to run scheduled tasks the more sensible way - The long awaited Part 2!</h1>
+    <h2>Adding in Quartz.Net and doing some actual scheduling! What a time to be alive!</h2>
+    <p class="meta">Mar 27, 2018</p>
+  </div>
+</header>
+
+<div class="wrap post">
+
+  <article class="post-content">
+    <p>TL;DR: Adding a Quartz.net scheduler to a service built with Topshelf, Autofac and Serilog is pretty straightforward. Using a configuration file for the scheduling opens up lots of possibilies. <a href="https://github.com/steve-codemunkies/WindowsSchedulerService">Code for the whole solution is available</a>.</p>
+
+<p>In <a href="/2016/12/09/building-windows-scheduler-service/">part one</a> of this mini-series we setup a Windows Service using <a href="http://topshelf-project.com/">Topshelf</a>, and it had a funky little class that setup a timer to repeatedly fire an event. This though was not the promised scheduler.</p>
+
+<p>After a brief interlude I’m back to fill in the gaps.</p>
+
+<p>(Ignoring some <a href="https://github.com/steve-codemunkies/WindowsSchedulerService/commit/87981e24891603a6563ad7a18f3598a2975fa101">version updating</a>) The first thing I did was to install <a href="http://www.quartz-scheduler.net/">Quartz.Net</a> and some helper packages. This is done through the <em>Package Manager Console</em> with the following commands: <code class="highlighter-rouge">Install-Package Quartz.Plugins -DependencyVersion Highest</code> and <code class="highlighter-rouge">Install-Package Autofac.Extras.Quartz</code>. Installing <code class="highlighter-rouge">Autofac.Extras.Quartz</code> is done to bring some key helper classes that plumb Autofac and Quartz together. But why bring <code class="highlighter-rouge">Quartz.Plugins</code>, why not just bring <code class="highlighter-rouge">Quartz</code>? The reason for this is that it allows us to configure our jobs in a <em>configuration file</em>. And put simply this (to me at least) is much more interesting and flexible than hard coding the jobs in code, or heavens help us, inventing our own method of loading schedules.</p>
+
+<p>It’s still necessary to do a little bit more plumbing to get <code class="highlighter-rouge">Topshelf</code> and <code class="highlighter-rouge">Quartz.net</code> talking to each other, and this is where a new implementation of <code class="highlighter-rouge">ITestService</code> comes in:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class QuartzTestService : ITestService
+{
+    private readonly IScheduler _jobScheduler;
+    private readonly ILogger _logger;
+
+    public QuartzTestService(IScheduler jobScheduler, ILogger logger)
+    {
+        _jobScheduler = jobScheduler;
+        _logger = logger;
+    }
+
+    public void Start()
+    {
+        _jobScheduler.Start();
+        _logger.Information("Job scheduler started");
+    }
+
+    public void Stop()
+    {
+        _jobScheduler.Shutdown(true);
+        _logger.Information("Job scheduler stopped");
+    }
+}
+</code></pre></div></div>
+
+<p>Taking in an instance of <code class="highlighter-rouge">ILogger</code> and logging when the service is starting and stopping is not mandatory, but it has helped me solve little oddities in the past (usually by helping to point out that the service is failing long before it get’s to the point where it has <em>“started”</em>). And that is all that is required to plumb <code class="highlighter-rouge">Topshelf</code> and <code class="highlighter-rouge">Quartz.net</code> together. We pass <code class="highlighter-rouge">true</code> to the <a href="https://quartznet.sourceforge.io/apidoc/3.0/html/?topic=html/c0a37f4d-84df-9158-a4b0-b74f8db06c04.htm"><code class="highlighter-rouge">IScheduler.Shutdown</code></a> method to say that we are happy waiting for the any existing jobs to complete before exiting. This can occasionally cause the service to hang when you run it in the console. But on the whole seems to work well. But do checkout the <a href="https://quartznet.sourceforge.io/apidoc/3.0/html/#">documentation</a> for other ways to shutdown <code class="highlighter-rouge">Quartz.net</code>.</p>
+
+<p>Because we’re using <code class="highlighter-rouge">Autofac</code>, and we’ve provided a new implementation of <code class="highlighter-rouge">ITestService</code> actually using all of this is really easy. The <code class="highlighter-rouge">ConventionModule</code> will take care of <code class="highlighter-rouge">QuartzTestService</code>, but we need to do something to get <code class="highlighter-rouge">Quartz.net</code> itself up and running. This is done by adding two <code class="highlighter-rouge">LoadModule</code> calls to the method where we configure <code class="highlighter-rouge">Autofac</code>:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>builder.RegisterModule(new QuartzAutofacFactoryModule {ConfigurationProvider = QuartzConfigurationProvider});
+builder.RegisterModule(new QuartzAutofacJobsModule(typeof(Program).Assembly));
+</code></pre></div></div>
+
+<p>The second line is actually the easiest to deal with. The <a href="https://github.com/alphacloud/Autofac.Extras.Quartz/blob/master/src/Autofac.Extras.Quartz/QuartzAutofacJobsModule.cs"><code class="highlighter-rouge">QuartzAutofacJobsModule</code></a> registers all classes that implement <code class="highlighter-rouge">IJob</code> with <code class="highlighter-rouge">Autofac</code> in a way that allows them to be used with <code class="highlighter-rouge">Quartz.net</code>.</p>
+
+<p>The first line uses <a href="https://github.com/alphacloud/Autofac.Extras.Quartz/blob/master/src/Autofac.Extras.Quartz/QuartzAutofacFactoryModule.cs"><code class="highlighter-rouge">QuartzAutofacFactoryModule</code></a> to setup everything that <code class="highlighter-rouge">Quartz.net</code> actually needs with <code class="highlighter-rouge">Autofac</code>. You’ll see that at the same time we can also configure (<code class="highlighter-rouge">ConfigurationProvider = QuartzConfigurationProvider</code>). <code class="highlighter-rouge">QuartzConfigurationProvider</code> is a method that takes an <code class="highlighter-rouge">IComponentContext</code> and returns a <code class="highlighter-rouge">NameValueCollection</code>. This is the one included in the sample:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>private static NameValueCollection QuartzConfigurationProvider(IComponentContext arg)
+{
+    return new NameValueCollection
+    {
+        ["quartz.scheduler.instanceName"] = "XmlConfiguredInstance",
+        ["quartz.threadPool.type"] = "Quartz.Simpl.SimpleThreadPool, Quartz",
+        ["quartz.threadPool.threadCount"] = "5",
+        ["quartz.plugin.xml.type"] = "Quartz.Plugin.Xml.XMLSchedulingDataProcessorPlugin, Quartz.Plugins",
+        ["quartz.plugin.xml.fileNames"] = "quartz-jobs.config",
+        ["quartz.plugin.xml.FailOnFileNotFound"] = "true",
+        ["quartz.plugin.xml.failOnSchedulingError"] = "true"
+    };
+}
+</code></pre></div></div>
+
+<p>We’re doing a few things here. We’re telling <code class="highlighter-rouge">Quartz.net</code> to use a plugin to parse scheduling data from a file (<code class="highlighter-rouge">quartz.plugin.xml.type</code>), we also telling it the file (<code class="highlighter-rouge">quartz.plugin.xml.fileNames</code>) and what to do in certain scenarios (<code class="highlighter-rouge">quartz.plugin.xml.FailOnFileNotFound</code> and <code class="highlighter-rouge">quartz.plugin.xml.failOnSchedulingError</code>). The scheduling file itself is reasonably straightforward:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?xml version="1.0" encoding="utf-8" ?&gt;</span>
+<span class="nt">&lt;job-scheduling-data</span> <span class="na">xmlns=</span><span class="s">"http://quartznet.sourceforge.net/JobSchedulingData"</span>
+                     <span class="na">xmlns:xsi=</span><span class="s">"http://www.w3.org/2001/XMLSchema-instance"</span>
+                     <span class="na">version=</span><span class="s">"2.0"</span><span class="nt">&gt;</span>
+
+  <span class="nt">&lt;processing-directives&gt;</span>
+    <span class="nt">&lt;overwrite-existing-data&gt;</span>true<span class="nt">&lt;/overwrite-existing-data&gt;</span>
+  <span class="nt">&lt;/processing-directives&gt;</span>
+
+  <span class="nt">&lt;schedule&gt;</span>
+
+    <span class="nt">&lt;job&gt;</span>
+      <span class="nt">&lt;name&gt;</span>Sample job<span class="nt">&lt;/name&gt;</span>
+      <span class="nt">&lt;group&gt;</span>Sample job group<span class="nt">&lt;/group&gt;</span>
+      <span class="nt">&lt;description&gt;</span>This is the description of the sample job<span class="nt">&lt;/description&gt;</span>
+      <span class="nt">&lt;job-type&gt;</span>Service.SampleJob, Service<span class="nt">&lt;/job-type&gt;</span>
+      <span class="nt">&lt;durable&gt;</span>true<span class="nt">&lt;/durable&gt;</span>
+      <span class="nt">&lt;recover&gt;</span>false<span class="nt">&lt;/recover&gt;</span>
+      <span class="nt">&lt;job-data-map&gt;</span>
+        <span class="nt">&lt;entry&gt;</span>
+          <span class="nt">&lt;key&gt;</span>key0<span class="nt">&lt;/key&gt;</span>
+          <span class="nt">&lt;value&gt;</span>value0<span class="nt">&lt;/value&gt;</span>
+        <span class="nt">&lt;/entry&gt;</span>
+        <span class="nt">&lt;entry&gt;</span>
+          <span class="nt">&lt;key&gt;</span>key1<span class="nt">&lt;/key&gt;</span>
+          <span class="nt">&lt;value&gt;</span>value1<span class="nt">&lt;/value&gt;</span>
+        <span class="nt">&lt;/entry&gt;</span>
+        <span class="nt">&lt;entry&gt;</span>
+          <span class="nt">&lt;key&gt;</span>key2<span class="nt">&lt;/key&gt;</span>
+          <span class="nt">&lt;value&gt;</span>value2<span class="nt">&lt;/value&gt;</span>
+        <span class="nt">&lt;/entry&gt;</span>
+      <span class="nt">&lt;/job-data-map&gt;</span>
+    <span class="nt">&lt;/job&gt;</span>
+
+    <span class="nt">&lt;trigger&gt;</span>
+      <span class="nt">&lt;cron&gt;</span>
+        <span class="nt">&lt;name&gt;</span>Sample Job Trigger<span class="nt">&lt;/name&gt;</span>
+        <span class="nt">&lt;group&gt;</span>Sample Job Group Trigger<span class="nt">&lt;/group&gt;</span>
+        <span class="nt">&lt;description&gt;</span>This is the sample job trigger description<span class="nt">&lt;/description&gt;</span>
+        <span class="nt">&lt;job-name&gt;</span>Sample job<span class="nt">&lt;/job-name&gt;</span>
+        <span class="nt">&lt;job-group&gt;</span>Sample job group<span class="nt">&lt;/job-group&gt;</span>
+        <span class="nt">&lt;misfire-instruction&gt;</span>SmartPolicy<span class="nt">&lt;/misfire-instruction&gt;</span>
+        <span class="c">&lt;!-- Trigger every five seconds starting at 1 second past --&gt;</span>
+        <span class="nt">&lt;cron-expression&gt;</span>1/5 * * * * ?<span class="nt">&lt;/cron-expression&gt;</span>
+      <span class="nt">&lt;/cron&gt;</span>
+    <span class="nt">&lt;/trigger&gt;</span>
+
+  <span class="nt">&lt;/schedule&gt;</span>
+
+<span class="nt">&lt;/job-scheduling-data&gt;</span>
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">Quartz.net</code> splits all scheduled jobs into two parts, the <code class="highlighter-rouge">&lt;job/&gt;</code> which is the what, and the <code class="highlighter-rouge">&lt;trigger/&gt;</code> which is the when. Because of the way that <code class="highlighter-rouge">Quartz.net</code> is setup you can easily extend the triggers, and indeed my team has done this with a <em>follow-on</em> trigger, that allows us to schedule just one job, but as part of each job specify the next job that should be run. For us this means that we have been able easily break down a complex export task to six simpler tasks, and schedule them one after the other without guessing how long each one will take.</p>
+
+<p>It’s worth calling out the <code class="highlighter-rouge">/job-scheduling-data/schedule/job/job-type</code> element. This is the <a href="https://platinumdogs.me/2010/01/05/net-5-part-or-fully-qualified-type-and-assembly-names/">Fully Qualified Type Name</a> for the type that implements <code class="highlighter-rouge">IJob</code>. I haven’t specified the <code class="highlighter-rouge">Version</code>, <code class="highlighter-rouge">Culture</code> or <code class="highlighter-rouge">PublicKeyToken</code> as they are not necessary. So now we need to implement the <code class="highlighter-rouge">Service.SampleJob</code>:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class SampleJob : IJob
+{
+    private readonly ILogger _logger;
+    private readonly Guid _tellTale = Guid.NewGuid();
+
+    public SampleJob(ILogger logger)
+    {
+        _logger = logger;
+    }
+
+    public Task Execute(IJobExecutionContext context)
+    {
+        return Task.Run(() =&gt;
+        {
+            _logger.Information("Executing sample job");
+            _logger.Information($"Name: {context.JobDetail.Key.Name}");
+            _logger.Information($"Description: '{context.JobDetail.Description}'");
+            _logger.Information($"Fire time utc: {context.FireTimeUtc:yyyy-MM-dd HH:mm:ss zzz}");
+            foreach (var data in context.JobDetail.JobDataMap)
+            {
+                _logger.Information($"\tKey: {data.Key}; Value: {data.Value}");
+            }
+            _logger.Information($"Tell tale: {_tellTale}");
+        });
+    }
+}
+</code></pre></div></div>
+
+<p>The <code class="highlighter-rouge">_tellTale</code> is simply there to show that the job class is instantiated every time the trigger fires. This is important because if you have state that needs to be stored between job calls you need to find somewhere to store it. As you can see the <code class="highlighter-rouge">Execute</code> method returns a <code class="highlighter-rouge">Task</code>, but you need to <a href="http://blog.stephencleary.com/2012/02/async-and-await.html">be careful about mixing styles</a>. The rest of the method simply demonstrates how to get data from the context.</p>
+
+  </article>
+
+  
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+  /* * * CONFIGURATION VARIABLES * * */
+  var disqus_shortname = 'codemunkies';
+
+  /* * * DON'T EDIT BELOW THIS LINE * * */
+  (function() {
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+  
+
+</div>
+
+    <!-- </div> -->
+  </div>
+
+  <footer class="site-footer">
+
+  <div class="wrap">
+
+    <h2 class="footer-heading">codemunkies</h2>
+
+    <div class="footer-col-1 column">
+      <ul>
+        <li>codemunkies</li>
+        <li><a href="mailto:steve@codemunki.es">steve@codemunki.es</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col-2 column">
+      <ul>
+        <li>
+          <a href="https://github.com/steve-codemunkies">
+            <span class="icon github">
+              <i class="fa fa-github"></i>
+            </span>
+            <span class="username">/steve-codemunkies</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://twitter.com/codemunkies">
+            <span class="icon twitter">
+              <i class="fa fa-twitter"></i>
+            </span>
+            <span class="username">/codemunkies</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://twitter.com/SteveHocking">
+            <span class="icon twitter">
+              <i class="fa fa-twitter"></i>
+            </span>
+            <span class="username">/SteveHocking</span>
+          </a>
+        </li>
+        <li>
+          <a href="http://stackoverflow.com/users/747649/steve">
+            <span class="icon stackoverflow">
+              <i class="fa fa-stack-overflow"></i>
+            </span>
+            <span class="username">/steve</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="footer-col-3 column">
+      <p class="text"></p>
+    </div>
+
+  </div>
+
+</footer>
+
+
+</body>
+
+</html>

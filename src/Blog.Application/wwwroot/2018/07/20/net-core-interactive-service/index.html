@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Building an interactive service with .NET Core 2.1</title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="description" content="">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    
+
+    <meta name="twitter:card" content="summary" />
+<meta name="twitter:site" content="@codemunkies" />
+
+
+<meta name="twitter:title" content="Building an interactive service with .NET Core 2.1" />
+
+
+
+<meta name="twitter:description" content="Exploring whats new with .NET Core 2.1 whilst also exploring how to make services a bit friendlier" />
+
+
+
+<meta name="twitter:image" content="http://localhost:4000/cm.png" />
+
+
+    
+<meta property="og:url" content="http://localhost:4000/2018/07/20/net-core-interactive-service/" />
+
+<meta property="og:site_name" content="codemunkies by Steve Hocking" />
+
+
+<meta property="og:type" content="article" />
+
+
+
+<meta property="og:title" content="Building an interactive service with .NET Core 2.1" />
+
+
+
+<meta property="og:description" content="Exploring whats new with .NET Core 2.1 whilst also exploring how to make services a bit friendlier" />
+
+
+
+<meta property="og:image" content="http://localhost:4000/cm.png" />
+
+
+
+</head>
+
+
+<body>
+
+  <header class="site-header">
+
+  <div class="wrap">
+
+    <a class="site-title" href="/">codemunkies</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+           viewBox="0 0 18 15" enable-background="new 0 0 18 15" xml:space="preserve">
+          <path fill="#505050" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0
+            h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#505050" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484
+            h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#505050" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0
+            c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+      <div class="trigger">
+        
+          <a class="page-link" href="/about/">About codemunkies</a>
+        
+          <a class="page-link" href="/feed.xml"></a>
+        
+          <a class="page-link" href="/"></a>
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+  <div class="page-content">
+    <!-- <div class="wrap">
+      <img src="/cm.png" alt="codemunkies" /> -->
+
+      
+<header class="post-header" style="background-image: url('/assets/blog-banner.jpg');">
+
+  <div class="wrap">
+    <img src="/cm.png" alt="codemunkies" />
+    <h1>Building an interactive service with .NET Core 2.1</h1>
+    <h2>Exploring whats new with .NET Core 2.1 whilst also exploring how to make services a bit friendlier</h2>
+    <p class="meta">Jul 20, 2018</p>
+  </div>
+</header>
+
+<div class="wrap post">
+
+  <article class="post-content">
+    <p><strong>TL;DR</strong>: .NET Core 2.1 makes Windows Services really straight forward, and integrating other parts of .NET Core technology is very straight-forward. Go look at the <a href="https://github.com/steve-codemunkies/ServiceHttpConfig">sample application</a>.</p>
+
+<p>It started with a tweet (that I can’t find…) And then it lay, festering, for a while. An itch unscratched. <em>How to make windows service configuration/status available via http?</em> Of course I actually already possess <em>all</em> of the tools necessary to do this. I’m just a bit short of time (and in truth some motivation) to work out <em>how</em> to get all those disparate pieces working together.</p>
+
+<p>And then there was another tweet, or more accurately a blizzards of tweets:</p>
+
+<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">Ok tweeting about some hidden gems in the release that people may not know about. <a href="https://twitter.com/hashtag/aspnetcore?src=hash&amp;ref_src=twsrc%5Etfw">#aspnetcore</a> <a href="https://twitter.com/hashtag/dotentcore?src=hash&amp;ref_src=twsrc%5Etfw">#dotentcore</a></p>&mdash; David Fowler (@davidfowl) <a href="https://twitter.com/davidfowl/status/1004232622845804544?ref_src=twsrc%5Etfw">June 6, 2018</a></blockquote>
+<script async="" src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+<p>And in there, close to the top, were these two:</p>
+
+<blockquote class="twitter-tweet" data-conversation="none" data-lang="en"><p lang="en" dir="ltr">Next, Windows services now work on .NET Core <a href="https://t.co/RFSCY4JyyY">https://t.co/RFSCY4JyyY</a>. The docs are being updated <a href="https://t.co/8w6FQw72og">https://t.co/8w6FQw72og</a> (it still says .NET Framework only)</p>&mdash; David Fowler (@davidfowl) <a href="https://twitter.com/davidfowl/status/1004233944085118976?ref_src=twsrc%5Etfw">June 6, 2018</a></blockquote>
+<script async="" src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+<blockquote class="twitter-tweet" data-conversation="none" data-lang="en"><p lang="en" dir="ltr">Next, IHostedService. A way to run long running background operations in both the generic host and in your web hosted applications. <a href="https://t.co/cR2rB8SZHa">https://t.co/cR2rB8SZHa</a>. 2.1 added support for a BackgroundService base class that makes it trivial to write a long running async loop.</p>&mdash; David Fowler (@davidfowl) <a href="https://twitter.com/davidfowl/status/1004233301823852544?ref_src=twsrc%5Etfw">June 6, 2018</a></blockquote>
+<script async="" src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+<iframe src="https://giphy.com/embed/l4KhPbIIDgO3sMw0w" width="480" height="429" frameborder="0" class="giphy-embed-right"></iframe>
+
+<p>I might just have found my motivation…</p>
+
+<p><a href="https://blogs.msdn.microsoft.com/dotnet/2018/05/30/announcing-net-core-2-1/">.NET Core 2.1</a> was announced at the end of May this year, and it is the kind of step change that .NET Fx (Framework) 2 was to .NET Fx 1.1. To me at least it moves Core from being something I want to work with, to something that I can happily and easily work with day in and day out. Motivation sorted I got on with it (kind of…)</p>
+
+<p>The sample I slapped together is available on <a href="https://github.com/steve-codemunkies/ServiceHttpConfig">GitHub</a>, and details of links etc are available in the individual commits:</p>
+
+<ul>
+  <li><a href="https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/windows-service?view=aspnetcore-2.1">Host ASP.NET Core in a Windows Service</a> - Running a .NET Core application as a service. It’s worth noting that to get the sample to work at this point I needed to fix versions to <code class="highlighter-rouge">2.1.0</code>, and I needed an extra <code class="highlighter-rouge">using</code> statement: <code class="highlighter-rouge">Microsoft.AspNetCore.Hosting.WindowsServices</code></li>
+  <li>Adding <a href="https://autofac.org/">Autofac</a> was based on the Autofac <a href="https://autofaccn.readthedocs.io/en/latest/integration/aspnetcore.html">ASP.NET Core</a> and <a href="https://autofaccn.readthedocs.io/en/latest/integration/netcore.html">.NET Core</a> documentation, as well as the <a href="https://github.com/autofac/Examples/tree/master/src/AspNetCoreExample">ASP.NET Core</a> and <a href="https://github.com/autofac/Examples/tree/master/src/GenericHostBuilderExample">Generic Host Builder</a> Examples</li>
+  <li>Adding the hosted service (essentially the service that runs in the background) was based on <a href="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services?view=aspnetcore-2.1#timed-background-tasks">docs.microsoft</a></li>
+  <li>Going back to the <a href="https://www.rabbitmq.com/tutorials/tutorial-one-dotnet.html">RabbitMq Tutorials</a> really helped a huge amount (internally at work we have a very sophisticated package that works nicely with RabbitMq and Autofac, but means I’ve completely forgotten how to RabbitMq…)</li>
+  <li>Finally setting up App-Metrics was based on the <a href="https://www.app-metrics.io/getting-started/">getting started tutorial</a>, and <a href="https://www.app-metrics.io/web-monitoring/aspnet-core/">ASP.NET Core docs</a> and <a href="https://www.app-metrics.io/web-monitoring/aspnet-core/quick-start/">quick start</a></li>
+</ul>
+
+<p>The real work came in figuring out how to get the (now badly named) <a href="https://github.com/steve-codemunkies/ServiceHttpConfig/blob/master/ServiceApp/TimedHostedService.cs"><code class="highlighter-rouge">TimedHostedService</code></a> into the Home Controller. Initially I simply had DI inject an instance. But it quickly became apparent that this <em>wasn’t</em> the instance that the Framework had setup to run in the background.</p>
+
+<p>Looking in <a href="https://github.com/steve-codemunkies/ServiceHttpConfig/blob/master/ServiceApp/Startup.cs#L23">Startup</a> I needed to work out what <code class="highlighter-rouge">.AddHostedService&lt;&gt;()</code> was doing. Rather nicely .NET Core is open source, so this is <a href="https://github.com/aspnet/Hosting/blob/master/src/Microsoft.Extensions.Hosting.Abstractions/ServiceCollectionHostedServiceExtensions.cs">very straight forward</a>. And it turns out the method is just registering my type as a transient type, that specifically implements <code class="highlighter-rouge">IHostedService</code>. Taking this knowledge I can now dump that call to register the hosted service, and substitute it with a <a href="https://github.com/steve-codemunkies/ServiceHttpConfig/blob/master/ServiceApp/Startup.cs#L52">new registration (in Autofac)</a> that tells the DI there should only be one instance of the class, and that it implements multiple interfaces. As a friend says Job Jobbed.</p>
+
+<p>In truth if you’re putting something in to production you probably want to tidy this up, but the basic concept is there. Are there other changes you might want to make? Definitely:</p>
+
+<ul>
+  <li>To get ASP.NET MVC working nicely I brought along <em>a lot</em> of extras, that’s not nice really. Can they be cut down? How about using something like <a href="http://nancyfx.org/">Nancy Fx</a>?</li>
+  <li>The view to get the service status and button in front of the user isn’t included in the executable, which could lead to issues, perhaps those could be retrieved from Resources, or elsewhere?</li>
+  <li>The DI setup is gnarly, that can probably be cleaned up as well</li>
+</ul>
+
+<p>But I’m going to leave these inspirations for another time.</p>
+
+  </article>
+
+  
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+  /* * * CONFIGURATION VARIABLES * * */
+  var disqus_shortname = 'codemunkies';
+
+  /* * * DON'T EDIT BELOW THIS LINE * * */
+  (function() {
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+  
+
+</div>
+
+    <!-- </div> -->
+  </div>
+
+  <footer class="site-footer">
+
+  <div class="wrap">
+
+    <h2 class="footer-heading">codemunkies</h2>
+
+    <div class="footer-col-1 column">
+      <ul>
+        <li>codemunkies</li>
+        <li><a href="mailto:steve@codemunki.es">steve@codemunki.es</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col-2 column">
+      <ul>
+        <li>
+          <a href="https://github.com/steve-codemunkies">
+            <span class="icon github">
+              <i class="fa fa-github"></i>
+            </span>
+            <span class="username">/steve-codemunkies</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://twitter.com/codemunkies">
+            <span class="icon twitter">
+              <i class="fa fa-twitter"></i>
+            </span>
+            <span class="username">/codemunkies</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://twitter.com/SteveHocking">
+            <span class="icon twitter">
+              <i class="fa fa-twitter"></i>
+            </span>
+            <span class="username">/SteveHocking</span>
+          </a>
+        </li>
+        <li>
+          <a href="http://stackoverflow.com/users/747649/steve">
+            <span class="icon stackoverflow">
+              <i class="fa fa-stack-overflow"></i>
+            </span>
+            <span class="username">/steve</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="footer-col-3 column">
+      <p class="text"></p>
+    </div>
+
+  </div>
+
+</footer>
+
+
+</body>
+
+</html>

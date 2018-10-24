@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Dealing with emergency fixes on poorly understood legacy systems</title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="description" content="">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    
+
+    <meta name="twitter:card" content="summary" />
+<meta name="twitter:site" content="@codemunkies" />
+
+
+<meta name="twitter:title" content="Dealing with emergency fixes on poorly understood legacy systems" />
+
+
+
+<meta name="twitter:description" content="If these things were easy everyone would be doing it" />
+
+
+
+<meta name="twitter:image" content="http://localhost:4000/assets/2015-11-05-legacy.jpg" />
+
+
+    
+<meta property="og:url" content="http://localhost:4000/2015/11/05/emergency-fixes-for-legacy-systems/" />
+
+<meta property="og:site_name" content="codemunkies by Steve Hocking" />
+
+
+<meta property="og:type" content="article" />
+
+
+
+<meta property="og:title" content="Dealing with emergency fixes on poorly understood legacy systems" />
+
+
+
+<meta property="og:description" content="If these things were easy everyone would be doing it" />
+
+
+
+<meta property="og:image" content="http://localhost:4000/assets/2015-11-05-legacy.jpg" />
+
+
+
+</head>
+
+
+<body>
+
+  <header class="site-header">
+
+  <div class="wrap">
+
+    <a class="site-title" href="/">codemunkies</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+           viewBox="0 0 18 15" enable-background="new 0 0 18 15" xml:space="preserve">
+          <path fill="#505050" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0
+            h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#505050" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484
+            h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#505050" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0
+            c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+      <div class="trigger">
+        
+          <a class="page-link" href="/about/">About codemunkies</a>
+        
+          <a class="page-link" href="/feed.xml"></a>
+        
+          <a class="page-link" href="/"></a>
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+  <div class="page-content">
+    <!-- <div class="wrap">
+      <img src="/cm.png" alt="codemunkies" /> -->
+
+      
+<header class="post-header" style="background-image: url('/assets/2015-11-05-legacy.jpg'); background-size: cover;">
+
+  <div class="wrap">
+    <img src="/cm.png" alt="codemunkies" />
+    <h1>Dealing with emergency fixes on poorly understood legacy systems</h1>
+    <h2>If these things were easy everyone would be doing it</h2>
+    <p class="meta">Nov 5, 2015</p>
+  </div>
+</header>
+
+<div class="wrap post">
+
+  <article class="post-content">
+    <p><strong>TL;DR</strong> Planning, even in an emergency, produces confidence and ensures the desired outcome is reached.</p>
+
+<p>I have recently joined a small team of developers (who are part of a larger development community), helping to look after two legacy solutions. The first solution has been developed in house over a number of years, and whilst it isn’t in the best condition is straightforward, and a known quantity. I’ll write more about this solution in the future.</p>
+
+<p>The second, and by some distance - larger, solution is not like this. The acquisition path of this software is convoluted, at best. The software originates with a third party supplier, but is licensed as source code that we have the right to modify. The source code is now pretty ancient (in computing terms), and looks crusty.</p>
+
+<p>As luck would have it an Emergency has forced the business to request that we update data in the database directly (to cancel sales), as the software is (correctly) blocking the necessary changes. It soon transpired that this was not the first time this type of request had been made, and nor would it be the last…</p>
+
+<p>To improve the whole teams understanding of the system we decided to take a few steps back and work through the problem methodically, as a pair. And this is the process that we followed:</p>
+
+<ul>
+  <li>
+    <p><strong>Identify the desired end state for the <em>majority</em> of the data</strong>. It seems obvious, but one of my colleagues was preparing to dive straight in and alter data directly on the live server. This would have been disastrous as the changes we needed are very complex. The first step in this process was to find data related to a correctly cancelled simple sale. This was important, as most sales will be straight forward, but some become complicated because of (allowed) interventions further in the process.</p>
+  </li>
+  <li>
+    <p><strong>Prototype the changes on a test system</strong>. In the majority of systems this will be simple and straightforward, unfortunately for us it wasn’t. Unfortunately the schema for our piece of software has a severe case of <em>mutating column names</em>: i.e. An Id column on one table will not use that name in any of the other tables. This means that mostly through prior knowledge, and a lot of experimentation we had to divine how various tables are linked.<br />
+But because we were using a test system it didn’t matter.</p>
+  </li>
+  <li>
+    <p><strong>Test the changes on a <em>copy</em> of the live system</strong>. Once we had our proposed fix we tested it on a local copy of the live database. The reason we did this was that we lacked confidence that the data we had been testing against was sufficiently similar to the live data we needed to modify. Doing the modification against a copy of live gave us confidence. It also meant that we could connect a copy of the software and check that everything looked correct.</p>
+  </li>
+  <li>
+    <p><strong>Apply the changes to the live system</strong>. And it was at this point we were <em>very</em> happy we’d tried it against a copy of live. We knew that some of our modifications would error, but on our test server the script had simply carried on. For whatever reason on the live server it stopped at the first error. But because we’d already tried our solution against live data we knew that there was a fundamental problem, we simply needed to slightly alter our approach to the problem.</p>
+  </li>
+  <li>
+    <p><strong>Automate the fix</strong>. Well actually, in our case we didn’t fully automate it. Instead we’ve created a new stored procedure and documented it’s use, complete with sample calling script. For us, this is good enough, as we do not want to encourage the business to be doing this on a regular basis. However the next time the business need it we will be in a position to do the work in an hour or so, and more importantly other members of the team will be able to do the job.</p>
+  </li>
+</ul>
+
+<p>Ultimately all this meant that it took a day and a half to complete the change for the business, instead of their hoped for hour-or-so. But if we hadn’t done it this way, then an initial change would have been done very quickly, but we would be revisiting the consequences for some time to come.</p>
+
+  </article>
+
+  
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+  /* * * CONFIGURATION VARIABLES * * */
+  var disqus_shortname = 'codemunkies';
+
+  /* * * DON'T EDIT BELOW THIS LINE * * */
+  (function() {
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+  
+
+</div>
+
+    <!-- </div> -->
+  </div>
+
+  <footer class="site-footer">
+
+  <div class="wrap">
+
+    <h2 class="footer-heading">codemunkies</h2>
+
+    <div class="footer-col-1 column">
+      <ul>
+        <li>codemunkies</li>
+        <li><a href="mailto:steve@codemunki.es">steve@codemunki.es</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col-2 column">
+      <ul>
+        <li>
+          <a href="https://github.com/steve-codemunkies">
+            <span class="icon github">
+              <i class="fa fa-github"></i>
+            </span>
+            <span class="username">/steve-codemunkies</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://twitter.com/codemunkies">
+            <span class="icon twitter">
+              <i class="fa fa-twitter"></i>
+            </span>
+            <span class="username">/codemunkies</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://twitter.com/SteveHocking">
+            <span class="icon twitter">
+              <i class="fa fa-twitter"></i>
+            </span>
+            <span class="username">/SteveHocking</span>
+          </a>
+        </li>
+        <li>
+          <a href="http://stackoverflow.com/users/747649/steve">
+            <span class="icon stackoverflow">
+              <i class="fa fa-stack-overflow"></i>
+            </span>
+            <span class="username">/steve</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="footer-col-3 column">
+      <p class="text"></p>
+    </div>
+
+  </div>
+
+</footer>
+
+
+</body>
+
+</html>

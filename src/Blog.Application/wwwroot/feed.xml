@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>codemunkies</title>
+    <description></description>
+    <link>http://localhost:4000/</link>
+    <atom:link href="http://localhost:4000/feed.xml" rel="self" type="application/rss+xml" />
+    
+      <item>
+        <title>Using Powershell to interrogate xml</title>
+        <description>What to do when confronted with 100,000 lines of technobabble</description>
+        <pubDate>Fri, 05 Oct 2018 11:15:00 +0100</pubDate>
+        <link>http://localhost:4000/2018/10/05/using-powershell-interrogate-xml/</link>
+        <guid isPermaLink="true">http://localhost:4000/2018/10/05/using-powershell-interrogate-xml/</guid>
+      </item>
+    
+      <item>
+        <title>Building an interactive service with .NET Core 2.1</title>
+        <description>Exploring whats new with .NET Core 2.1 whilst also exploring how to make services a bit friendlier</description>
+        <pubDate>Fri, 20 Jul 2018 10:00:00 +0100</pubDate>
+        <link>http://localhost:4000/2018/07/20/net-core-interactive-service/</link>
+        <guid isPermaLink="true">http://localhost:4000/2018/07/20/net-core-interactive-service/</guid>
+      </item>
+    
+      <item>
+        <title>The Pit of Success</title>
+        <description>Because the Guided Busway to Success isn't as emotive or intriguing, also it's not just for developers!</description>
+        <pubDate>Fri, 01 Jun 2018 15:00:00 +0100</pubDate>
+        <link>http://localhost:4000/2018/06/01/pit-of-success/</link>
+        <guid isPermaLink="true">http://localhost:4000/2018/06/01/pit-of-success/</guid>
+      </item>
+    
+      <item>
+        <title>How not to write SQL statements</title>
+        <description>Your TSQL statements might be around a lot longer than you expect...</description>
+        <pubDate>Fri, 11 May 2018 14:15:00 +0100</pubDate>
+        <link>http://localhost:4000/2018/05/11/how-not-to-sql/</link>
+        <guid isPermaLink="true">http://localhost:4000/2018/05/11/how-not-to-sql/</guid>
+      </item>
+    
+      <item>
+        <title>Are you the best developer, or the lead developer?</title>
+        <description>There is a difference, but not everyone realises it.</description>
+        <pubDate>Wed, 09 May 2018 00:15:00 +0100</pubDate>
+        <link>http://localhost:4000/2018/05/09/best-developer-or-lead-developer/</link>
+        <guid isPermaLink="true">http://localhost:4000/2018/05/09/best-developer-or-lead-developer/</guid>
+      </item>
+    
+      <item>
+        <title>Building a Windows Service to run scheduled tasks the more sensible way - The long awaited Part 2!</title>
+        <description>Adding in Quartz.Net and doing some actual scheduling! What a time to be alive!</description>
+        <pubDate>Tue, 27 Mar 2018 08:45:00 +0100</pubDate>
+        <link>http://localhost:4000/2018/03/27/building-windows-scheduler-service-pt2/</link>
+        <guid isPermaLink="true">http://localhost:4000/2018/03/27/building-windows-scheduler-service-pt2/</guid>
+      </item>
+    
+      <item>
+        <title>Building a Windows Service to run scheduled tasks the more sensible way - Part 1</title>
+        <description>Topshelf, Quartz.Net, Autofac and Serilog; Oh My! What a time to be alive!</description>
+        <pubDate>Fri, 09 Dec 2016 15:00:00 +0000</pubDate>
+        <link>http://localhost:4000/2016/12/09/building-windows-scheduler-service/</link>
+        <guid isPermaLink="true">http://localhost:4000/2016/12/09/building-windows-scheduler-service/</guid>
+      </item>
+    
+      <item>
+        <title>Enabling Jenkins to build GitHub Enterprise Pull Requests</title>
+        <description>Taking some of the load out of code reviews</description>
+        <pubDate>Thu, 13 Oct 2016 09:55:00 +0100</pubDate>
+        <link>http://localhost:4000/2016/10/13/enabling-jenkins-github-pull-request-building/</link>
+        <guid isPermaLink="true">http://localhost:4000/2016/10/13/enabling-jenkins-github-pull-request-building/</guid>
+      </item>
+    
+      <item>
+        <title>One little secret worth knowing about IIS performance</title>
+        <description>Forget the depth, feel the breadth!</description>
+        <pubDate>Thu, 06 Oct 2016 15:30:00 +0100</pubDate>
+        <link>http://localhost:4000/2016/10/06/iis-performance-weirdness/</link>
+        <guid isPermaLink="true">http://localhost:4000/2016/10/06/iis-performance-weirdness/</guid>
+      </item>
+    
+      <item>
+        <title>How to destroy the performance of an SQL query, and then bring it back</title>
+        <description>But it's only a FLAG!!!</description>
+        <pubDate>Fri, 09 Sep 2016 16:00:00 +0100</pubDate>
+        <link>http://localhost:4000/2016/09/09/destroying-sql-performance-restoring/</link>
+        <guid isPermaLink="true">http://localhost:4000/2016/09/09/destroying-sql-performance-restoring/</guid>
+      </item>
+    
+  </channel>
+</rss>

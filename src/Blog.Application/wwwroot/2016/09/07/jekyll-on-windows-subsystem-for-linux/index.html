@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Running Jekyll on Windows Subsystem for Linux</title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="description" content="">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    
+
+    <meta name="twitter:card" content="summary" />
+<meta name="twitter:site" content="@codemunkies" />
+
+
+<meta name="twitter:title" content="Running Jekyll on Windows Subsystem for Linux" />
+
+
+
+<meta name="twitter:description" content="Yuh, Jekyll, on Windows, without errors!" />
+
+
+
+<meta name="twitter:image" content="http://localhost:4000/cm.png" />
+
+
+    
+<meta property="og:url" content="http://localhost:4000/2016/09/07/jekyll-on-windows-subsystem-for-linux/" />
+
+<meta property="og:site_name" content="codemunkies by Steve Hocking" />
+
+
+<meta property="og:type" content="article" />
+
+
+
+<meta property="og:title" content="Running Jekyll on Windows Subsystem for Linux" />
+
+
+
+<meta property="og:description" content="Yuh, Jekyll, on Windows, without errors!" />
+
+
+
+<meta property="og:image" content="http://localhost:4000/cm.png" />
+
+
+
+</head>
+
+
+<body>
+
+  <header class="site-header">
+
+  <div class="wrap">
+
+    <a class="site-title" href="/">codemunkies</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+           viewBox="0 0 18 15" enable-background="new 0 0 18 15" xml:space="preserve">
+          <path fill="#505050" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0
+            h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#505050" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484
+            h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#505050" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0
+            c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+      <div class="trigger">
+        
+          <a class="page-link" href="/about/">About codemunkies</a>
+        
+          <a class="page-link" href="/feed.xml"></a>
+        
+          <a class="page-link" href="/"></a>
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+  <div class="page-content">
+    <!-- <div class="wrap">
+      <img src="/cm.png" alt="codemunkies" /> -->
+
+      
+<header class="post-header" style="background-image: url('/assets/blog-banner.jpg');">
+
+  <div class="wrap">
+    <img src="/cm.png" alt="codemunkies" />
+    <h1>Running Jekyll on Windows Subsystem for Linux</h1>
+    <h2>Yuh, Jekyll, on Windows, without errors!</h2>
+    <p class="meta">Sep 7, 2016</p>
+  </div>
+</header>
+
+<div class="wrap post">
+
+  <article class="post-content">
+    <p>Hello, it’s been a long time. And something that has changed in that long time is the <a href="https://msdn.microsoft.com/en-gb/commandline/wsl/about">Windows Subsystem for Linux</a> (WSL). As well as a catchy name that just trips off the tongue, there are also a <a href="https://blogs.windows.com/buildingapps/2016/07/22/fun-with-the-windows-subsystem-for-linux/#ULclTWZJyUUb70M2.97">lot</a> <a href="http://www.howtogeek.com/265900/everything-you-can-do-with-windows-10s-new-bash-shell/">of</a> <a href="http://www.hanselman.com/blog/VIDEOHowToRunLinuxAndBashOnWindows10AnniversaryUpdate.aspx">excited</a> <a href="https://visualstudiomagazine.com/articles/2016/07/21/bash-on-windows-linux.aspx">people</a>. Including me it turns out!</p>
+
+<p>This blog is <a href="https://jekyllrb.com/">Jekyll</a> based and hosted on github (thanks GitHub!). Previously I ran an <a href="/2014/07/13/setting-up-ubuntu-server-in-a-hyper-v-vm/">Ubuntu Server VM</a> on my laptop to run Jekyll and update the blog. This was painful.</p>
+
+<p>The reason for this is that Ruby isn’t exactly the most Windows friendly execution environment. But now we have WSL! Yay! So I found some <a href="http://daverupert.com/2016/04/jekyll-on-windows-with-bash/">excellent instructions</a>, and followed them. Next I cloned my repo on to my disk. Then in Bash cd’d to the right folder, issued the command:</p>
+
+<pre>jekyll serve -w</pre>
+
+<p>and got back the following for my troubles:</p>
+
+<pre>jekyll 3.2.1 | Error:  Invalid argument - Failed to watch "/mnt/c/Work/steve-codemunkies.github.io/.git/hooks": the given event mask contains no legal events; or fd is not an inotify file descriptor.</pre>
+
+<p>This is frankly bobbins. As Dave Rupert notes there is a <a href="https://wpdev.uservoice.com/forums/266908-command-prompt-console-bash-on-ubuntu-on-windo/suggestions/13469097-support-for-filesystem-watchers-like-inotify">UserVoice</a> to bring to Microsoft’s attention that you want something like this, and there is also a related <a href="https://github.com/Microsoft/BashOnWindows/issues/216">Git Issue</a>. But this doesn’t get me any further. But then <a href="https://github.com/jekyll/jekyll/issues/5233">a Jekyll Git Issue</a> surfaced which lead me to issuing the command:</p>
+
+<pre>jekyll serve -w --force_polling</pre>
+
+<p>and it all works! As advertised! So no more need to run an Ubuntu Server VM! Yay! Happy blogging!</p>
+
+  </article>
+
+  
+  <div id="disqus_thread"></div>
+<script type="text/javascript">
+  /* * * CONFIGURATION VARIABLES * * */
+  var disqus_shortname = 'codemunkies';
+
+  /* * * DON'T EDIT BELOW THIS LINE * * */
+  (function() {
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+  
+
+</div>
+
+    <!-- </div> -->
+  </div>
+
+  <footer class="site-footer">
+
+  <div class="wrap">
+
+    <h2 class="footer-heading">codemunkies</h2>
+
+    <div class="footer-col-1 column">
+      <ul>
+        <li>codemunkies</li>
+        <li><a href="mailto:steve@codemunki.es">steve@codemunki.es</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col-2 column">
+      <ul>
+        <li>
+          <a href="https://github.com/steve-codemunkies">
+            <span class="icon github">
+              <i class="fa fa-github"></i>
+            </span>
+            <span class="username">/steve-codemunkies</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://twitter.com/codemunkies">
+            <span class="icon twitter">
+              <i class="fa fa-twitter"></i>
+            </span>
+            <span class="username">/codemunkies</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://twitter.com/SteveHocking">
+            <span class="icon twitter">
+              <i class="fa fa-twitter"></i>
+            </span>
+            <span class="username">/SteveHocking</span>
+          </a>
+        </li>
+        <li>
+          <a href="http://stackoverflow.com/users/747649/steve">
+            <span class="icon stackoverflow">
+              <i class="fa fa-stack-overflow"></i>
+            </span>
+            <span class="username">/steve</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="footer-col-3 column">
+      <p class="text"></p>
+    </div>
+
+  </div>
+
+</footer>
+
+
+</body>
+
+</html>
