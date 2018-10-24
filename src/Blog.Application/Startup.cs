@@ -25,6 +25,11 @@ namespace Blog.Application
                 app.UseDeveloperExceptionPage();
             }
 
+            app.Use(async (context, next) => {
+                context.Response.Headers.Add("X-machine-name", Environment.MachineName);
+                await next.Invoke();
+            });
+
             app.UseDefaultFiles();
             app.UseStaticFiles();
         }
